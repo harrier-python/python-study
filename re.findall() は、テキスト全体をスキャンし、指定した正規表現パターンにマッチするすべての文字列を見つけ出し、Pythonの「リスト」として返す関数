@@ -1,0 +1,14 @@
+import re
+
+# 複数のメールアドレスが含まれるテキスト
+text = "担当者A: user1@old-domain.com, 担当者B: user2@new-domain.com, 担当者C: user3@old-domain.com"
+
+# 古いドメインに一致するすべての部分を抽出
+matches = re.findall(r'@old-domain\.com', text)
+
+print(matches) 
+# 出力結果: ['@old-domain.com', '@old-domain.com']
+
+# リストの長さを数えれば、該当件数も簡単にわかります
+print(f"古いドメインは {len(matches)} 件見つかりました。")
+# 出力結果: 古いドメインは 2 件見つかりました。
