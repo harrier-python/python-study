@@ -1,0 +1,4 @@
+def find_eid(report):
+    pattern = r"[A-Z]-\d{7,8}"                 # 大文字1文字、ハイフン、7〜8桁の数字
+    result = re.findall(pattern, report)       # re.findallですべてのIDをリストとして抽出
+    return result
