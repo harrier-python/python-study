@@ -1,0 +1,10 @@
+import re
+
+# 古いメールアドレスのテキスト
+email_text = "ユーザーの連絡先は user1@old-domain.com です。"
+
+# re.sub(探すパターン, 新しい文字列, 対象のテキスト)
+new_text = re.sub(r'@old-domain\.com', '@new-domain.com', email_text)
+
+print(new_text) 
+# 出力結果: "ユーザーの連絡先は user1@new-domain.com です。"
