@@ -1,0 +1,15 @@
+import subprocess
+import time
+
+# バックグラウンドで5秒sleepするプロセスを起動
+process = subprocess.Popen(['sleep', '5'])
+
+# Pythonは待たずに次の処理に進める！
+print("プロセスはバックグラウンドで実行中...")
+time.sleep(2)
+
+# プロセスがまだ動いてるかチェック
+if process.poll() is None:
+    print("まだ実行中")
+else:
+    print("終了しました")
