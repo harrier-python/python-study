@@ -1,0 +1,4 @@
+#!/bin/bash
+for fruit in peach orange pear; do
+  echo "${fruit}が好き！"
+done
