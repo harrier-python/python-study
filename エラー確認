@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+import psutil
+
+def check_cpu_usage(percent):
+    usage = psutil.cpu_percent(1) # 1秒間計測して正確な値を取得
+    print("DEBUG: usage: {}".format(usage)) # 取得した値を画面に表示（デバッグ）
+    return usage < percent
+
+if not check_cpu_usage(75):
+    print("ERROR! CPUがオーバーロードしています")
+else:
+    print("何も問題ありません")
