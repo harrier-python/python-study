@@ -1,0 +1,10 @@
+$ git log --stat -1
+
+commit 033f27a8196987d61c4fd42930f2148b234a03
+Author: 私の名前 <me@example.com>
+Date:   Mon Jul 15 14:39:18 2019 +0200
+
+    mainからcheck_rebootを呼び出し、エラー時に1で終了するようにしました。
+
+ all_checks.py | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
