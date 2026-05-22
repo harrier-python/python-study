@@ -1,0 +1,22 @@
+# まだステージされていない（git addしていない）変更を確認する場合
+$ git diff
+# (出力なし：すべての変更をすでに git add している場合など)
+
+# コミット準備が完了している（ステージ済みの）変更を確認する場合
+$ git diff --staged
+
+diff --git a/all_checks.py b/all_checks.py
+index 710266a..fdc4476 100644
+--- a/all_checks.py
++++ b/all_checks.py
+@@ -10,5 +10,8 @@ def main():
+         print("Pending Reboot.")
+         sys.exit(1)
+ 
++    print("Everything ok.")
++    sys.exit(0)
++
+ main()
+
+# 確認して問題なければ、コミットを実行します
+$ git commit -m "問題ない場合のメッセージを追加"
