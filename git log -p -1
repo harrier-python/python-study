@@ -1,0 +1,22 @@
+$ git log -p -1
+# (-1 は最新の1件だけを表示するという意味です)
+
+commit 033f27a8196987d61c4fd42930f2148b234a03
+Author: 私の名前 <me@example.com>
+Date:   Mon Jul 15 14:39:18 2019 +0200
+
+    mainからcheck_rebootを呼び出し、エラー時に1で終了するようにしました。
+
+diff --git a/all_checks.py b/all_checks.py
+index 340f1f7..710266a 100644
+--- a/all_checks.py
++++ b/all_checks.py
+@@ -1,12 +1,15 @@
+ #!/usr/bin/env python3
+ 
+ import os
++import sys
+ 
+ def check_reboot():
+     """コンピュータに保留中の再起動があればTrueを返す"""
+     return os.path.exists("/run/reboot-required")
