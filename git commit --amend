@@ -1,0 +1,33 @@
+# Gitコマンド学習記録: コミットの修正 (`git commit --amend`)
+
+## 概要
+コミットにファイルを含め忘れた場合や、コミットメッセージを修正したい場合に、新しいコミットを作らずに「直前のコミットを上書き（修正）」する手順の記録。
+
+## 実行手順
+
+### 1. 準備：ファイルの作成
+作業用ディレクトリ（`scripts/`）に移動し、2つの空ファイルを作成する。
+
+```bash
+cd scripts/
+touch auto-update.py
+touch gather-information.sh
+ls -l
+
+
+
+git add auto-update.py
+git commit -m 'Add two new scripts'
+
+
+
+git add gather-information.sh
+git commit --amend
+
+
+Add two new scripts.
+
+gather-information.sh will collect information in case of errors.
+auto-update.py will run daily to update computers automatically.
+
+
