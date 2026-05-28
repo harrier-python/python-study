@@ -1,0 +1,130 @@
+# git_explain.py
+import time
+
+class GitSimulator:
+    def __init__(self):
+        # 1. 初期状態：最初は 'even-better-feature' ブランチにいる
+        self.current_branch = "even-better-feature"
+        self.branches = ["even-better-feature", "master", "new-feature"]
+        
+        # 各ブランチに存在するファイルのシミュレーション
+        self.repository_files = {
+            "even-better-feature": [
+                "-rw-rw-r-- 1 user user 659 Jul 17 00:02 disk_usage.py",
+                "-rw-rw-r-- 1 user user 53 Jul 17 15:33 free_memory.py"
+            ],
+            "master": [
+                "-rw-rw-r-- 1 user user 659 Jul 17 00:02 disk_usage.py"
+            ],
+            "new-feature": [
+                "-rw-rw-r-- 1 user user 659 Jul 17 00:02 disk_usage.py"
+            ]
+        }
+
+    def run_command(self, command):
+        print(f"\n==================================================")
+        print(f" 実行コマンド: {command}")
+        print(f"==================================================")
+        time.sleep(0.5)  # 読みやすくするためのウェイト
+        
+        if command == "cd checks && git status":
+            print("[実際の出力]")
+            print(f"ブランチ {self.current_branch}")
+            print("コミットするものはありません。")
+            print("\n【日本語解説】")
+            print(f"・現在は '{self.current_branch}'（さらに良い機能）というブランチに移動しています。")
+            print("・'コミットするものはありません' とは、作業スペースに保存していない変更がなく、クリーンな状態であることを意味します。")
+
+        elif command == "ls -l (even-better-feature時)":
+            print("[実際の出力]")
+            print("合計 8")
+            for f in self.repository_files["even-better-feature"]:
+                print(f)
+            print("\n【日本語解説】")
+            print(f"・'{self.current_branch}' ブランチには、'disk_usage.py' と 'free_memory.py' の【2つのファイル】が存在しています。")
+
+        elif command == "git checkout master":
+            print("[実際の出力]")
+            self.current_branch = "master"  # 内部状態をmasterに切り替え
+            print("ブランチ 'master' に切り替わりました。")
+            print("\n【日本語解説】")
+            print("・作業ブランチを主要なブランチである 'master' に切り替えました（チェックアウト）。")
+            print("・これにより、フォルダ（作業ディレクトリ）の中身も master ブランチの状態に同期されます。")
+
+        elif command == "git log -2":
+            print("[実際の出力]")
+            print("user@ubuntu:~/checks$ git log -2")
+            print("コミット 80b2dacef4b567196e61651064f03089c5e70b5e (HEAD -> master, new-feature)")
+            print("作者私の名前 <me@example.com>")
+            print("日付: Wed Jul 17 00:02:39 2019 +0200")
+            print('    "disk_usage.pyの新しい名前 "を差し戻しました。\n')
+            print("    ロールバックの理由: 前の名前の方が実は良かった。\n")
+            print("    これはコミット 7d7167b2db44abf8cf014230f9b9708786e41c2a を取り消します。")
+            print("commit abb063210c1f011b0d6470a4c5f1d8f672edd3ef")
+            print("著者私の名前 <me@example.com>")
+            print("日付: Mon Jul 15 22:20:45 2019 +0200")
+            print("    .DS_STOREファイルを無視するgitignoreファイルを追加しました。")
+            print("\n【日本語解説】")
+            print("・masterブランチの直近2つのコミット履歴を表示しています。")
+            print("・一番上の `(HEAD -> master, new-feature)` に注目してください。")
+            print("  これは『現在の自分の位置(HEAD)は master にあり、new-feature ブランチも全く同じコミット（履歴の先頭）を指している』ことを示します。")
+            print("  つまり、new-feature の変更はすべてすでに master に安全に取り込まれている状態です。")
+
+        elif command == "ls -l (master時)":
+            print("[実際の出力]")
+            print("合計 4")
+            for f in self.repository_files["master"]:
+                print(f)
+            print("\n【日本語解説】")
+            print("・masterブランチに切り替えた後、再度ファイル一覧を見ると、ファイルが 'disk_usage.py' の【1つだけ】に減っています。")
+            print("・先ほど見えていた 'free_memory.py' は 'even-better-feature' ブランチで新しく作られたファイルであり、まだ master には存在しない（マージされていない）ことが視覚的に分かります。")
+
+        elif command == "git branch (1回目)":
+            print("[実際の出力]")
+            print("さらに良い機能")
+            print("* マスター")
+            print("新機能")
+            print("\n【日本語解説】")
+            print("・現在このリポジトリにあるローカルブランチの一覧です。")
+            print("・`*` がついている「マスター(master)」が、現在自分が滞在しているブランチです。")
+
+        elif command == "git branch -d new-feature":
+            print("[実際の出力]")
+            if "new-feature" in self.branches:
+                self.branches.remove("new-feature")
+                print("new-feature ブランチを削除しました (80b2dac ブランチでした)。")
+                print("\n【日本語解説】")
+                print("・`git branch -d` はブランチを安全に削除するコマンドです。")
+                print("・先ほどのログで確認した通り、`new-feature` は `master` と完全に同じ状態（マージ済み）だったため、警告なしで安全に削除できました。")
+
+        elif command == "git branch (2回目)":
+            print("[実際の出力]")
+            print("even-better-feature")
+            print("* マスター")
+            print("\n【日本語解説】")
+            print("・削除が成功したため、ブランチ一覧から `new-feature`（新機能）が消え、2つだけになりました。")
+
+        elif command == "git branch -d even-better-feature":
+            print("[実際の出力]")
+            print("エラー：ブランチ 'even-better-feature' は完全にマージされていません。")
+            print("本当に削除したいのなら、'git branch -D even-better-feature'を実行してください。")
+            print("\n【日本語解説】")
+            print("・`even-better-feature` ブランチを削除しようとしましたが、Gitがエラーを出して拒否しました。")
+            print("・なぜなら、このブランチには master にはまだ存在しないファイル（free_memory.py）や変更が含まれているからです。")
+            print("・Gitは、開発者がまだ統合していない大切なコードを誤って消して失ってしまうのを防ぐため、通常削除（小文字の `-d`）をブロックします。")
+            print("・もし変更をすべて捨てて強制的に消したい場合は、指示通り大文字の `-D` オプション（git branch -D）を使う必要があります。")
+
+# シミュレーションの実行
+if __name__ == "__main__":
+    sim = GitSimulator()
+    
+    # 提示された一連のシナリオを順番に実行
+    sim.run_command("cd checks && git status")
+    sim.run_command("ls -l (even-better-feature時)")
+    sim.run_command("git checkout master")
+    sim.execute = sim.run_command("git log -2")
+    sim.run_command("ls -l (master時)")
+    sim.run_command("git branch (1回目)")
+    sim.run_command("git branch -d new-feature")
+    sim.run_command("git branch (2回目)")
+    sim.run_command("git branch -d even-better-feature")
