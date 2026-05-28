@@ -1,0 +1,57 @@
+# atom free_memory.py (ファイルを開いて編集)
+#!/usr/bin/env python3
+  
+def main():
+    """Checks if there's enough free memory in the computer.""" # コメントを追加
+
+main()
+
+
+git checkout even-better-feature
+
+
+# atom free_memory.py (ファイルを開いて編集)
+#!/usr/bin/env python3
+  
+def main():
+    print("Everything ok.") # print文を追加
+
+main()
+
+
+git checkout master
+git merge even-better-feature
+
+
+#!/usr/bin/env python3
+  
+def main():
+<<<<<<< HEAD
+    """Checks if there's enough free memory in the computer."""
+=======
+    print("Everything ok.")
+>>>>>>> even-better-feature
+
+main()
+
+#!/usr/bin/env python3
+  
+def main():
+    """Checks if there's enough free memory in the computer."""
+    print("Everything ok.")
+
+main()
+
+
+git add free_memory.py  # ステージング（解決マークをつける）
+git commit              # コミットする（エディタが開くのでそのまま保存）
+
+
+* 8cb5e62 (HEAD -> master) 'even-better-feature' ブランチをマージしました。
+|\  <-- 2つのルートが合流したことを示すグラフ
+| * ca6de99 (even-better-feature) Print everything ok
+* | fe2fc5b main()にコメントを追加
+|/
+
+
+
