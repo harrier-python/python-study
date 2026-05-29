@@ -1,0 +1,52 @@
+$ ./food_question.py
+Traceback (most recent call last):
+  File "./food_question.py", line 10, in <module>
+    if item not in counter:
+NameError: name 'item' is not defined
+
+
+# 新しいブランチを作成して移動
+git branch improve-output
+git checkout improve-output
+
+
+print("Favourite foods, from most popular to least popular")
+
+
+$ ./food_count.py
+Favourite foods, from most popular to least popular
+rice, 12
+burgers, 10
+...
+
+
+git add food_count.py
+git commit -m "Adding a line in the output describing the utility of food_count.py script"
+
+
+git log
+
+
+git revert [原因のコミットID]
+
+
+
+$ ./food_question.py
+Select your favorite food below:
+pie
+...
+Which of the foods above is your favorite? rice
+12 of your friends like rice as well!
+
+
+# masterブランチに切り替え
+git checkout master
+
+# improve-outputブランチの変更を取り込む
+git merge improve-output
+
+
+git status
+# "nothing to commit, working tree clean" と表示されることを確認
+
+
