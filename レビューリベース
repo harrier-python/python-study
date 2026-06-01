@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+import os
+import shutil
+import sys
+import socket
+import psutil
+
+def check_reboot():
+    """システムの再起動が保留されているかどうかを確認します。"""
+    return os.path.exists("/run/reboot-required")
+
+def check_disk_full(disk, min_gb, min_percent):
+    """ディスクの空き容量が基準を満たしているか確認します。"""
+    du = shutil.disk_usage(disk)
+    # 空き容量のパーセンテージとGBを計算
+    percent_free = 100 * du.free / du.total
+    gigabytes_free = du.free / 2**30
+    
+    if percent_free < min_percent or gigabytes_free < min_gb:
+        return True
+    return False
+
+def check_root_full():
+    """ルートパーティションの容量がいっぱいかどうかを判定します。"""
+    return check_disk_full(disk="/", min_gb=2, min_percent=10)
+
+def check_cpu_constrained():
+    """CPUの使用率が高すぎる場合（75%超）にTrueを返します。"""
+    return psutil.cpu_percent(1) > 75
+
+def check_no_network():
+    """GoogleのURLを名前解決できない場合（ネットワーク切断時）にTrueを返します。"""
+    try:
+        socket.gethostbyname("www.google.com")
+        return False
+    except:
+        return True
+
+def main():
+    # 実行するチェック関数と、エラー時に表示する日本語メッセージのリスト
+    checks = [
+        (check_reboot, "警告: 保留中の再起動があります。"),
+        (check_root_full, "エラー: ルートパーティションの空き容量が不足しています。"),
+        (check_cpu_constrained, "警告: CPUの負荷が高すぎます。"),
+        (check_no_network, "エラー: ネットワークが正常に接続されていません。"),
+    ]
+
+    everything_ok = True
+
+    # リストをループ処理して各チェックを実行
+    for check, message in checks:
+        if check():
+            print(message)
+            everything_ok = False
+
+    # 1つでも問題があれば終了コード1でプログラムを終了
+    if not everything_ok:
+        sys.exit(1)
+
+    # すべてクリアした場合のメッセージ
+    print("すべてのシステムチェックを通過しました。問題ありません！")
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
