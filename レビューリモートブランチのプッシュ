@@ -1,0 +1,18 @@
+git checkout -b <新しいブランチ名>
+
+git checkout -b refactor
+
+python all_checks.py
+
+
+git commit -a -m "ここに何をしたかメッセージを書く"
+
+git commit -a -m "Create wrapper function for check_disk_full"
+
+git push -u origin <ブランチ名>
+
+git push -u origin refactor
+
+https://github.com' のGitHub名: redquinoa
+https://redquinoa@github.com' のパスワード：
+
