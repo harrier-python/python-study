@@ -1,0 +1,38 @@
+git clone https://github.com/redquinoa/rearrange.git
+cd rearrange
+
+
+# ファイルの一覧を確認
+ls -l
+
+# コミット履歴を確認
+git log
+
+# 'add-readme'という名前のブランチを作成して切り替え
+git checkout -b add-readme
+
+
+# エディタでREADME.mdを開く（例: atomエディタの場合）
+atom README.md
+
+Rearrange
+=========
+
+This module is used for rearranging names.
+
+# 変更したファイルをステージング
+git add README.md
+
+# メッセージを付けてコミット
+git commit -m 'Add a simple README.md file'
+
+
+git push -u origin add-readme
+
+
+remote: Create a pull request for 'add-readme' on GitHub by visiting:
+remote:      https://github.com/redquinoa/rearrange/pull/new/add-readme
+
+
+
+
