@@ -1,0 +1,61 @@
+1. リベースの開始
+Bash
+git rebase -i master
+現在のブランチ（例: add-readme）の元となっている master ブランチを基準に、対話的（-i または --interactive）なリベースを開始します。これを実行するとテキストエディタが立ち上がります。
+
+2. コミットの指定（Pick と Squash）
+エディタが開くと、対象となるコミットが古い順に表示されます。
+
+変更前（デフォルト）:
+
+Plaintext
+pick 736d754 Add a simple README file
+pick 01231b0 Add more information to the README
+pick: そのコミットをそのまま採用するという意味です。
+
+変更後（Squashの指定）:
+
+Plaintext
+pick 736d754 Add a simple README file
+squash 01231b0 Add more information to the README
+2つ目のコミットの pick を squash に書き換えて保存します。
+
+squash を指定すると、「このコミットを、直前のコミット（上の行のコミット）に統合する」という指示になります。
+
+3. コミットメッセージの再編集
+ステップ2を保存して閉じると、直後にコミットメッセージを編集するための新しいエディタ画面が開きます。統合された複数のコミットメッセージがコメントアウトなしで並んでいるので、1つの分かりやすいメッセージに書き直します。
+
+変更後（例）:
+
+Plaintext
+# This is a combination of 2 commits.
+# This is the 1st commit message:
+Add a simple README file including an example use case
+
+# This is the commit message #2:
+# Add more information to the README (削除またはコメントアウト)
+不要な行を削除・修正し、統合されたコミットにふさわしい説明（ここでは「使用例を含むシンプルな README.md ファイルを追加しました」など）にして保存します。
+
+4. 履歴と状態の確認
+統合が成功したら、以下のコマンドで結果を確認します。
+
+git show: 最新のコミットの変更内容（差分）を表示し、統合された内容が正しく反映されているか確認します。
+
+git status: 現在のブランチの状態を確認します。
+
+git log --graph --oneline --all -4: コミット履歴をグラフ形式で1行ずつ、全ブランチを含めて最新4件表示します。履歴が1つにまとまっていることが視覚的に確認できます。
+
+5. GitHubへのプッシュ（強制プッシュ）
+Bash
+git push
+注意: 通常の git push はここでエラー（rejected）になります。
+理由は、ローカルでリベース（履歴の書き換え）を行ったため、すでにGitHub上にある古い履歴（origin）と整合性が合わなくなり、Gitが「他人の変更を上書きしてしまう危険がある」と判断してストップをかけるためです（ファストフォワードではない状態）。
+
+Bash
+git push -f
+履歴を書き換えたことを理解した上で、ローカルの綺麗な履歴でリモート（GitHub）を上書きするために -f (または --force) を付けて強制プッシュを実行します。これで統合されたコミットがGitHubに反映されます。
+
+⚠️ 警告: 強制プッシュ（push -f）は、自分だけが作業している個人ブランチでのみ使用してください。複数人で共有している master や main ブランチで行うと、他の人の作業履歴を破壊してしまうため厳禁です。
+
+この解説で、リベースとスカッシュの全体的な流れは掴めましたでしょうか？もし、作業中にコンフリクト（競合）が起きた場合の対処法など、さらに深く知りたい部分はありますか？
+
