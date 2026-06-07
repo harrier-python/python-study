@@ -1,0 +1,105 @@
+import tkinter as tk
+from tkinter import messagebox
+import datetime
+import sys
+
+# ----------------------------------------
+# バックエンド処理（ロジック部分）
+# ----------------------------------------
+
+def dow(date_str):
+    """日付文字列(YYYY-MM-DD)から曜日を取得する"""
+    try:
+        # ここでPythonが期待するフォーマットを指定
+        dateobj = datetime.datetime.strptime(date_str, "%Y-%m-%d")
+        return dateobj.strftime("%A")
+    except ValueError:
+        # フォーマットが違う場合は、具体的なエラーを投げる
+        raise ValueError("日付は YYYY-MM-DD の形式で入力してください。")
+
+def send_message(message, emails):
+    """メール送信のシミュレーション関数"""
+    # ※実際は smtplib や外部APIを使ってメールを送りますが、
+    # 今回は動作確認用にコンソールへ出力するだけにしています。
+    print(f"--- メール送信ログ ---")
+    print(f"宛先: {emails}")
+    print(f"本文:\n{message}")
+    print("----------------------")
+
+def submit():
+    """「送信」ボタンが押されたときの処理"""
+    # フォームから入力値を取得
+    date = entry_date.get()
+    title = entry_title.get()
+    emails = entry_emails.get()
+
+    # 入力漏れチェック
+    if not date or not title or not emails:
+        messagebox.showwarning("入力エラー", "すべての項目を入力してください。")
+        return
+
+    try:
+        # 曜日の取得（ここで日付フォーマットの検証も行われます）
+        day_of_week = dow(date)
+        
+        # 送信するメッセージの作成
+        message = f"リマインダー: {title}\n日付: {date} ({day_of_week})"
+        
+        # メールの送信処理
+        send_message(message, emails)
+        
+        # 成功メッセージを画面に表示
+        messagebox.showinfo("成功", f"{emails} へリマインダーを送信しました！")
+        root.destroy() # 送信成功後にウィンドウを閉じる
+        
+    except Exception as e:
+        # 元のコードで学んだ教訓：具体的なエラー内容をしっかり表示する
+        error_msg = f"処理に失敗しました:\n{e}"
+        print(error_msg, file=sys.stderr)
+        messagebox.showerror("エラー", error_msg)
+
+
+# ----------------------------------------
+# フロントエンド処理（GUIの作成部分）
+# ----------------------------------------
+
+# メインウィンドウの設定
+root = tk.Tk()
+root.title("Meeting Reminder")
+root.geometry("350x250")
+
+# 日付入力フォーム
+tk.Label(root, text="Date (YYYY-MM-DD):").pack(pady=5)
+entry_date = tk.Entry(root, width=30)
+entry_date.insert(0, "2026-06-07") # 入力例を最初から入れておく
+entry_date.pack()
+
+# タイトル入力フォーム
+tk.Label(root, text="Title:").pack(pady=5)
+entry_title = tk.Entry(root, width=30)
+entry_title.pack()
+
+# メールアドレス入力フォーム
+tk.Label(root, text="Emails (カンマ区切り):").pack(pady=5)
+entry_emails = tk.Entry(root, width=30)
+entry_emails.pack()
+
+# 送信ボタン
+tk.Button(root, text="送信する", command=submit, width=15).pack(pady=20)
+
+# アプリケーションの実行
+root.mainloop()
+
+tk.Tk()：土台となるウィンドウ（画面）を作る
+
+tk.Entry()：ユーザーが日付やメールアドレスを打ち込む「入力欄」を作る
+
+tk.Button()：「送信する」という「ボタン」を作る
+
+messagebox：エラーが起きたときや送信が成功したときに、ポーンと「ポップアップ画面」を出す
+
+
+
+
+
+
