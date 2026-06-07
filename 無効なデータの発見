@@ -1,0 +1,43 @@
+# contacts.csvの全データをimport.pyスクリプトに渡し、テストサーバーにインポートしようとする（ここでエラーが発生したと仮定）
+cat contacts.csv | ./import.py --server test
+
+# contacts.csvの全体の行数を確認する（データ規模の把握）
+wc -l contacts.csv 
+
+# ファイルの最初の15行を確認し、データ構造の当たりをつける
+head -15 contacts.csv 
+
+# ファイルの最後の20行を確認する
+tail -20 contacts.csv
+
+
+
+# 最初の50行だけを切り取ってテストを実行する
+# （もしここでエラーが出れば、1〜50行目の間に原因があるとわかる）
+head -50 contacts.csv | ./import.py --server test
+
+# 最初の50行のうち、さらに「前半25行（1〜25行目）」だけをテストする
+head -50 contacts.csv | head -25 | ./import.py --server test
+
+# もし前半25行でエラーが出なかった場合、今度は「後半25行（26〜50行目）」をテストする
+head -50 contacts.csv | tail -25 | ./import.py --server test
+
+
+# 26〜50行目の中から、最初の13行（26〜38行目）をテストする
+head -50 contacts.csv | tail -25 | head -13 | ./import.py --server test
+
+# （上記でエラーが出なかった場合）残りの12行（39〜50行目）の中から、最初の6行（39〜44行目）をテストする
+head -50 contacts.csv | tail -25 | tail -12 | head -6 | ./import.py --server test
+
+# エラーが数行のレベルまで絞り込めたら、スクリプトには渡さず、直接画面に出力して目視で無効なデータ（不正な文字や欠損など）を確認する
+head -50 contacts.csv | tail -25 | tail -12 | head -6 | head -3
+
+
+# 修正が完了したファイルを改めてインポートし、正常に完了することを確認する
+cat contacts.csv | ./import.py --server test
+
+
+パイプ（|）の活用: 前のコマンドの出力結果を、次のコマンドの入力として渡すことで、柔軟なテキスト処理が可能になります。
+
+二分探索の効率性: 1000行のデータから1行のエラーを探す場合でも、半分に割る作業を約10回繰り返すだけで特定できるため、非常に強力なデバッグ手法となります。
+
