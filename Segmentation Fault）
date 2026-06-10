@@ -1,0 +1,61 @@
+# 🐛 セグメンテーションフォルト（Segmentation Fault）のデバッグ実践
+
+## 📝 概要
+このプロジェクトは、C言語における典型的なメモリエラーである「セグメンテーションフォルト」を意図的に発生させ、Linux環境での**コアダンプ解析**と**GDB（GNUデバッガ）**を使ったデバッグ手法を学ぶためのサンプルです。
+
+標準ライブラリ関数（`strlen`など）内部でプログラムがクラッシュした場合に、どのように原因を特定するかの実践的な手順を解説します。
+
+## 💻 エラーが発生するプログラム (`example.c`)
+
+クラッシュの原因となるC言語のサンプルコードです。
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+void print_length(const char *text) {
+    // textがNULLのまま strlen に渡されるとクラッシュする
+    size_t len = strlen(text); 
+    printf("The length is: %zu\n", len);
+}
+
+int main() {
+    char *my_string = NULL; // 初期化されていない、または意図的にNULLにされたポインタ
+    
+    printf("Program started...\n");
+    print_length(my_string); // NULLポインタを関数に渡してしまう
+    printf("Program finished.\n"); // ここには到達しない
+    
+    return 0;
+}
+
+gcc -g example.c -o example
+
+ulimit -c unlimited
+
+./example
+
+Program started...
+Segmentation fault (core dumped)
+
+gdb -c core example
+
+Program terminated with signal SIGSEGV, Segmentation fault.
+#0  __strlen_avx2 () at ../sysdeps/x86_64/multiarch/strlen-avx2.S:65
+65	../sysdeps/x86_64/multiarch/strlen-avx2.S: No such file or directory.
+
+
+
+
+void print_length(const char *text) {
+    if (text == NULL) {
+        printf("Error: Provided string is NULL.\n");
+        return; // クラッシュを防ぐため、処理を中断する
+    }
+    size_t len = strlen(text); 
+    printf("The length is: %zu\n", len);
+}
+
+
+
+
