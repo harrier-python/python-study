@@ -1,0 +1,78 @@
+# Debugging a Python Crash (Pythonクラッシュのデバッギング)
+
+このプロジェクトは、CSVファイルからデータを読み込むPythonスクリプトで発生したクラッシュを、Python標準のデバッガ（`pdb`）を使用してトラブルシューティングするプロセスを記録したものです。
+
+## プログラムの目的
+`update_products.py` は、新しい商品データが含まれたCSVファイル（`new_products.csv`）を読み込み、システム上の商品リストやデータベースを更新するためのスクリプトです。
+
+## デバッグのワークフロー
+
+以下のコマンドラインの実行ログは、エラーの発見から修正までの手順を示しています。
+
+### 1. 入力データの確認
+```bash
+cat new_products.csv
+
+
+解説: catコマンドを使用して、入力元となるCSVファイルの中身を確認します。データのフォーマット（列の数やヘッダーの有無など）に異常がないかを目視でチェックします。
+
+2. スクリプトの実行とエラーの発生
+Bash
+./update_products.py new_products.csv
+# This throws an error (ここでエラーが発生してクラッシュします)
+解説: スクリプトを実行しますが、IndexError（リストの範囲外参照）や KeyError、あるいはデータ型の不一致などによりプログラムが途中で異常終了（クラッシュ）します。
+
+3. デバッガ（pdb）を使用した原因究明
+Bash
+pdb3 update_products.py new_products.csv
+解説: pdb3（Python 3のデバッガ）を使用してスクリプトを起動します。これにより、プログラムを1行ずつ実行（ステップ実行）したり、クラッシュした瞬間の変数の状態（中身）を確認したりすることができます。
+
+よく使うpdbコマンド:
+
+continue (c): エラーが発生するまで、または次のブレークポイントまで実行する。
+
+list (l): 現在実行中のソースコードの周辺を表示する。
+
+print (p): 特定の変数の現在の値を出力して確認する。
+
+4. 修正後の再実行
+Bash
+./update_products.py new_products.csv
+解説: pdbを使った調査で判明したバグ（例：空白行の処理漏れ、カンマ区切りのパースミスなど）をソースコード上で修正し、再度実行します。今度はエラーを出さずに正常に完了します。
+
+学んだこと・スキル
+Pythonスクリプト実行時のエラーハンドリング
+
+pdbモジュールを用いた実践的なデバッギング手法
+
+CSVデータ処理におけるエッジケース（予期せぬデータ形式）の考慮
+
+
+---
+
+### 💡 補足：内部のPythonコードはどうなっているか？
+
+この課題の `update_products.py` の内部は、おおよそ以下のようなコードになっていると推測されます。学習の振り返りとして参考にしてください。
+
+```python
+#!/usr/bin/env python3
+import csv
+import sys
+
+def update_products(filename):
+    with open(filename, mode='r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            # 【よくあるバグの原因】
+            # もしCSVに「空行」があると、rowが空のリスト [] になり、
+            # row[0] や row[1] にアクセスしようとした瞬間に IndexError が発生してクラッシュします。
+            
+            product_name = row[0]
+            product_price = row[1]
+            print(f"Updated: {product_name} - ${product_price}")
+
+if __name__ == "__main__":
+    # コマンドライン引数からファイル名を取得して実行
+    csv_file = sys.argv[1]
+    update_products(csv_file)
+デバッグでの修正ポイント： for row in reader: の直後に if not row: （行が空ならスキップする）という処理を追加することで、エラーを回避するようにコードを書き換えるのが一般的な解決策です。
