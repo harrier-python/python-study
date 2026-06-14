@@ -1,0 +1,89 @@
+import sqlite3
+import time
+
+DB_NAME = "test_database.db"
+
+def setup_database():
+    """テスト用のデータベースを準備します"""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT)")
+    conn.commit()
+    conn.close()
+
+def bad_practice_connection_leak():
+    """
+    【悪い例】
+    データベースに接続して処理を行いますが、conn.close() がありません。
+    これを何千回も繰り返すと、データベース側がパンクします。
+    """
+    print("-> [Bad Practice] 接続を開いたまま放置します...")
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users")
+    # 致命的なミス：ここで conn.close() を忘れている
+
+def good_practice_explicit_close():
+    """
+    【良い例】
+    try-finallyブロックを使い、途中でエラーが起きても
+    必ず最後に conn.close() が実行されるようにします。
+    （先ほどの事例の「2行のコード」に相当するアプローチです）
+    """
+    print("-> [Good Practice] 処理の最後に必ず close() を実行します。")
+    conn = sqlite3.connect(DB_NAME)
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users")
+        # 正常な処理...
+    finally:
+        # エラーが起きても起きなくても、確実に接続を閉じる
+        conn.close()
+        print("   接続を安全にクローズしました。")
+
+def best_practice_context_manager():
+    """
+    【ベストプラクティス (Python特有)】
+    'with' 文を使うと、ブロックを抜ける時にPythonが自動的に
+    リソースの解放を行ってくれます。閉じ忘れを完全に防ぐことができます。
+    """
+    print("-> [Best Practice] 'with'文を使って自動的にリソースを管理します。")
+    # Pythonでは with 文を使うことで安全に接続を管理できます
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users")
+    print("   ブロックを抜けたため、自動的にクローズされました。")
+
+if __name__ == "__main__":
+    setup_database()
+    
+    print("=== データベース接続のトラブルシューティング・デモ ===\n")
+    
+    bad_practice_connection_leak()
+    time.sleep(1)
+    
+    good_practice_explicit_close()
+    time.sleep(1)
+    
+    best_practice_context_manager()
+    
+    print("\nデモが完了しました。")
+
+
+
+# Database Connection Troubleshooting Demo
+
+## 概要
+このリポジトリは、アプリケーションのパフォーマンス低下の一般的な原因である「データベース接続の解放忘れ（リソースリーク）」と、その適切な対処法をPythonで実装・検証したものです。
+
+## 学んだこと
+ウェブアプリケーションがデータベースにアクセスする際、接続を適切に終了（クローズ）しないと、トラフィック増加時にデータベースの接続上限に達し、システムがクラッシュする原因となります。
+適切なリソース管理は、わずか数行のコード（`conn.close()` など）を追加するだけで防ぐことができる重要なデバッグの基本です。
+
+## スクリプトの内容 (`connection_demo.py`)
+1. **Bad Practice:** データベースを開いたまま放置し、リソースを消費し続ける悪い例。
+2. **Good Practice:** `try-finally`文を使用して、確実に `conn.close()` を実行する例。
+3. **Best Practice:** Pythonの `with` 文（コンテキストマネージャ）を使用し、自動的にリソースを解放する最も安全な例。
+
+
+
