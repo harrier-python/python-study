@@ -1,0 +1,16 @@
+# デフォルトノード（特定の定義がないすべてのサーバー）への設定
+node default {
+  class { 'sudo': }
+  class { 'ntp':
+    servers => ['ntp1.example.com', 'ntp2.example.com']
+  }
+}
+
+# 特定のWebサーバー（webserver.example.com）への設定
+node webserver.example.com {
+  class { 'sudo': }
+  class { 'ntp':
+    servers => ['ntp1.example.com', 'ntp2.example.com']
+  }
+  class { 'apache': }
+}
