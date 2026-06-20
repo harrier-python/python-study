@@ -1,0 +1,120 @@
+Puppet クライアントとサーバーのセットアップ
+このリポジトリ（またはドキュメント）では、Puppetを利用して構成管理を自動化するための、Puppetマスター（サーバー）とPuppetエージェント（クライアント）の基本的なセットアップ手順をまとめています。
+
+この手順を通じて、エージェントマシンにPuppetをインストールし、マスターと安全に接続した上で、Apacheウェブサーバーを自動デプロイする方法を解説します。
+
+概要
+Puppetはインフラストラクチャをコード（Infrastructure as Code）として管理するための強力なツールです。このガイドでは以下のステップを実行します。
+
+マスター側での証明書自動署名の有効化
+
+エージェント側へのPuppetのインストールと初期設定
+
+エージェントとマスター間の通信テスト
+
+マニフェストファイル（設定定義）の作成
+
+エージェント側でのPuppetサービスの自動起動設定
+
+ステップ 1: Puppetマスターの設定（自動署名の有効化）
+まず、Puppetマスター（サーバー）側で、新しく追加されたノード（エージェント）からの証明書署名要求（CSR）を自動的に承認するように設定します。
+
+Bash
+sudo puppet config --section master set autosign true
+解説:
+Puppetはマスターとエージェント間で安全に通信するためにSSL証明書を使用します。デフォルトでは、管理者が手動で証明書を承認する必要がありますが、このコマンドを実行することで、新規エージェント追加時の証明書要求へ自動的に署名するようになり、セットアップの自動化がスムーズになります。
+
+ステップ 2: Puppetエージェントのインストールと設定
+次に、対象となるクライアントマシン（ここでは webserver）にログインし、Puppetエージェントをインストールして、通信先のマスターサーバーを指定します。
+
+Bash
+# 1. webserverマシンにSSH接続
+ssh webserver
+
+# 2. Puppetエージェントパッケージのインストール (Ubuntu/Debian系の場合)
+sudo apt install puppet
+
+# 3. Puppetマスターのサーバー名を指定
+sudo puppet config set server ubuntu.example.com
+解説:
+
+ssh webserver: 管理対象となるマシンへリモートログインします。
+
+apt install puppet: APTパッケージマネージャーを利用してPuppetをインストールします。
+
+puppet config set server ...: Puppetエージェントがカタログ（構成情報）を取得するために通信するPuppetマスターのホスト名（ここでは ubuntu.example.com）を設定ファイルに書き込みます。
+
+ステップ 3: 接続テストと証明書の生成
+エージェントマシンの準備ができたら、Puppetマスターと正常に通信できるかテストを行います。
+
+Bash
+sudo puppet agent -v --test
+解説:
+
+-v (verbose): 詳細なログ出力を有効にし、何が行われているかを確認しやすくします。
+
+--test: テスト実行（ドライランおよび初回証明書生成）を行います。
+
+期待される出力例:
+このコマンドを実行すると、SSLキーの作成、マスターへの証明書署名要求、カタログの取得と適用までの一連の流れが表示されます。
+
+Plaintext
+Info: Creating a new SSL key for webserver.example.com
+Info: Caching certificates for ca
+Info: csr_attributes file loading from /etc/puppet/csr_attributes.yaml
+Info: Creating a new SSL certificate request for webserver.example.com
+Info: Certificate Request fingerprint (SHA256): 0E:E1:73:FB:...
+Info: Caching certificate for webserver.example.com
+...
+Info: Caching catalog for webserver.example.com
+Info: Applying configuration version ‘1575651019’
+Notice: Applied catalog in 0.07 seconds
+ステップ 4: マニフェスト（site.pp）の作成
+Puppetマスター側に戻り、エージェントをどのように構成するかを定義する「マニフェストファイル」を作成します。
+
+Bash
+# マニフェストファイルをVimエディタで開く（または新規作成）
+vim /etc/puppet/code/environments/production/manifests/site.pp
+site.pp の内容:
+
+Puppet
+node webserver {
+  class { 'apache': }
+}
+
+node default {}
+解説:
+このファイルは、どのノードにどのような設定を適用するかを定義するPuppetの心臓部です。
+
+node webserver { ... }: webserver という名前のノードに対する設定ブロックです。
+
+class { 'apache': }: 事前に定義された（またはモジュールとしてインストールされた）Apacheクラスを呼び出しています。これにより、Puppetが自動的にwebserverノードへApacheウェブサーバーをインストール・構成します。
+
+node default {}: 特定の設定が定義されていないその他のノードに対するデフォルトの振る舞い（ここでは何も設定しない）を定義しています。
+
+ステップ 5: Puppetサービスの自動起動と状態確認
+最後に、エージェントマシン上でPuppetサービスがバックグラウンドで常に稼働し、OS再起動時にも自動的に立ち上がるように設定します。
+
+Bash
+# OS起動時にPuppetサービスが自動起動するように設定（有効化）
+sudo systemctl enable puppet
+
+# Puppetサービスを今すぐ起動
+sudo systemctl start puppet
+
+# Puppetサービスの稼働状況を確認
+sudo systemctl status puppet
+期待される出力例（status コマンド）:
+
+Plaintext
+* puppet.service - Puppet agent
+   Loaded: loaded (/lib/systemd/system/puppet.service; enabled; vendor preset: enabled)
+   Active: active (running) since Tue 2019-11-26 21:13:30 UTC; 5s ago
+     Docs: man:puppet-agent(8)
+  Process: 30471 ExecStart=/usr/bin/puppet agent (code=exited, status=0/SUCCESS)
+ Main PID: 30496 (puppet)
+    Tasks: 2 (limit: 4395)
+   CGroup: /system.slice/puppet.service
+           └─30496 /usr/bin/ruby /usr/bin/puppet agent
+解説:
+systemd を使用してサービスの管理を行います。Active: active (running) と表示されていれば、Puppetエージェントは正常に稼働しており、定期的にマスターにポーリング（変更がないかの確認）を行う状態になっています。
