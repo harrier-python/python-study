@@ -1,0 +1,47 @@
+# Repository: harrier-python/puppet-manifests
+# Description: プルリクエスト作成時にPuppetマニフェストの構文チェックとドライランを実行します。
+
+name: Puppet Validation and Dry-Run
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  puppet-check:
+    name: Validate and Noop Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Ruby環境のセットアップ
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0' # Puppetの実行要件に合わせたバージョンを指定
+          
+      - name: Puppetのインストール
+        run: |
+          gem install puppet puppet-lint --no-document
+
+      - name: 構文チェック (Puppet Parser Validate)
+        run: |
+          echo "マニフェストの基本構文エラーをチェックしています..."
+          find . -name '*.pp' -exec puppet parser validate {} +
+
+      - name: コードスタイルチェック (Puppet Lint)
+        run: |
+          echo "Puppetのベストプラクティスに基づいたスタイルチェックを実行しています..."
+          # 警告で処理を停止させないよう、--fail-on-warnings は環境に合わせて調整してください
+          puppet-lint manifests/
+
+      - name: カタログコンパイルとドライラン (Puppet Apply --noop)
+        run: |
+          echo "CIコンテナ上でマニフェストの適用をシミュレーションしています..."
+          # 注意: CI環境には実際のエージェントのFactが存在しないため、
+          # マスター/エージェント間の完全な通信の代わりとして、ローカルでのカタログコンパイルをテストします。
+          # エラーなくカタログが生成されるかを確認するためのステップです。
+          puppet apply --noop manifests/site.pp
