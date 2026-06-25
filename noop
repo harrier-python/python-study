@@ -1,0 +1,5 @@
+# 基本的な実行コマンド
+sudo puppet agent --test --noop
+
+# または省略形
+sudo puppet agent -t --noop
